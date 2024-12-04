@@ -1,0 +1,80 @@
+%%Group Project Runge-Kutta
+clear
+
+% Initial conditions
+
+N = 1000; %Population
+
+b = 2; %Rate of infection
+
+g = 0.2; %Recovery rate
+
+final = 100; %End time
+
+%Step size
+h = 1;
+
+
+I(1) = 10; %infected population
+
+S(1) = N-I(1); %susceptable population
+
+R(1) = 0; %Recovered Population
+
+n=1;
+for t=0:h:final %Time Duration
+    
+    
+    %Susceptable population
+    k1 = -(b/N)*S(n)*I(n);
+
+    k2 = -(b/N)*(S(n)+(k1*h*.5))*(I(n)+(k1*h*.5));
+
+    k3 = -(b/N)*(S(n)+(k2*h*.5))*(I(n)+(k2*h*.5));
+
+    k4 = -(b/N)*(S(n)+(k3*h))*(I(n)+(k3*h));
+    
+    
+    S(n+1) = S(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+
+
+    %Infected population
+    k1 = ((b/N)*S(n)*I(n)) - (g*I(n));
+
+    k2 = ((b/N)*(S(n)+(k1*h*.5))*(I(n)+(k1*h*.5)))- (g*(I(n)+(k1*h*.5)));
+
+    k3 = ((b/N)*(S(n)+(k2*h*.5))*(I(n)+(k2*h*.5))) - (g*(I(n)+(k2*h*.5)));
+
+    k4 = ((b/N)*(S(n)+(k3*h))*(I(n)+(k3*h))) - (g*(I(n)+(k3*h)));
+
+
+    I(n+1) = I(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+
+
+    %Recovered Population
+    k1 = g*I(n);
+
+    k2 = g*(I(n)+(k1*h*.5));
+
+    k3 = g*(I(n)+(k2*h*.5));
+
+    k4 = g*(I(n)+k3*h);
+
+
+    R(n+1) = R(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+
+    
+
+n=n+1;
+end
+
+
+t=0:h:final+h;
+
+figure
+plot(t,S,t,I,t,R)
+
+title('Runge-Kutta (step size = 1)')
+xlabel('Time')
+ylabel('Population')
+legend({'S(t)','I(t)','R(t)'},'Location','northeast')
