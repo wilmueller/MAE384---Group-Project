@@ -1,116 +1,125 @@
-%%Group Project Runge-Kutta
-clear,clc
-% Initial conditions
-N = 1000; %Population
-b = 0.1; %Rate of infection
-g = 0.005; %Recovery rate
-final = 1500; %End time
-%Step size
-h = 1;
+clear,clc,close all
 
-I(1) = 20; %infected population
-S(1) = N-I(1); %susceptable population
-R(1) = 0; %Recovered Population
-n=1;
-for t = 0:h:final %Time Duration
-
-%Susceptable population
-k1 = -(b/N)*S(n)*I(n);
-k2 = -(b/N)*(S(n)+((k1*h)/2))*(I(n)+((k1*h)/2));
-k3 = -(b/N)*(S(n)+((k2*h)/2))*(I(n)+((k2*h)/2));
-k4 = -(b/N)*(S(n)+((k3*h)))*(I(n)+((k3*h)));
-S(n+1) = S(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
-
-%Infected population
-k1 = (b/N)*S(n)*I(n) - g*I(n);
-k2 = (b/N)*(S(n)+((k1*h)/2))*(I(n)+((k1*h)/2))- g*(I(n)+((k1*h)/2));
-k3 = (b/N)*(S(n)+((k2*h)/2))*(I(n)+((k2*h)/2)) - g*(I(n)+((k2*h)/2));
-k4 = (b/N)*(S(n)+((k3*h)))*(I(n)+((k3*h))) - g*(I(n)+k3*h);
-I(n+1) = I(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
-
-%Recovered Population
-k1 = g*I(n);
-k2 = g*(I(n)+((k1*h)/2));
-k3 = g*(I(n)+((k2*h)/2));
-k4 = g*(I(n)+k3*h);
-R(n+1) = R(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
-n=n+1;
+ha=.5*.5;
+hb=1.2*.5;
+xa=0:ha:10;
+xb=0:hb:10;
+x=0:.5:10;
+ya(1)=2;
+yb(1)=2;
+yai(1)=2;
+ybi(1)=2;
+y(1)=2;
+%small h
+for i=1:length(xa)-1
+    ya(i+1)=ya(i)+(-4*ya(i))*ha;
+    yai(i+1)=(yai(i)-4*ha*yai(i))/(2+4*ha);
+end
+%big h
+for i=1:length(xb)-1
+    yb(i+1)=yb(i)+(-4*yb(i))*hb;
+    ybi(i+1)=(ybi(i)-4*hb*ybi(i))/(2+4*hb);
+end
+%true
+for i=1:length(x)-1
+    y(i+1)=2*exp(-4*x(i));
 end
 
-t=0:h:final+h;
 figure(1);
-plot(t,S,t,I,t,R)
-title('Runge-Kutta',h)
-xlabel('Time')
-ylabel('Population')
-legend({'S(t)','I(t)','R(t)'},'Location','northeast')
-
+subplot(1,2,1)
+plot(xa,ya,xb,yb,x,y)
+sgtitle('dy/dx=-4y')
+title('Explicit')
+xlabel('x')
+ylabel('y')
+legend('.5*h','1.2*h','True')
+subplot(1,2,2)
+plot(xa,yai,xb,ybi,x,y)
+xlabel('x')
+ylabel('y')
+title('Implicit')
+legend('.5*h','1.2*h','True')
 %%
-%Interploation
-%initial conditions
-N = 1000; %Population
-b = 0.3; %Rate of infection
-g = 0.1; %Recovery rate
-final = 100; %End time
-%Step size
-h = 2;
-Ni=50; %Interpolated points
-%Error Summation
-TotS=0;
-TotI=0;
-TotR=0;
+N=[4,8,16,32];
 
-Ii(1) = 20; %infected population
-Si(1) = N-Ii(1); %susceptable population
-Ri(1) = 0; %Recovered Population
-t=0:h:final;
+x1=1:(3-1)/N(1):3;
+x2=1:(3-1)/N(2):3;
+x3=1:(3-1)/N(3):3;
+x4=1:(3-1)/N(4):3;
 
-for n = 1:length(t)-2 %Time Duration
-%Susceptable population
-k1 = -(b/N)*Si(n)*Ii(n);
-k2 = -(b/N)*(Si(n)+((k1*h)/2))*(Ii(n)+((k1*h)/2));
-k3 = -(b/N)*(Si(n)+((k2*h)/2))*(Ii(n)+((k2*h)/2));
-k4 = -(b/N)*(Si(n)+((k3*h)))*(Ii(n)+((k3*h)));
-Si(n+2) = Si(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+ya1(1)=4;
+ya2(1)=4;
+ya3(1)=4;
+ya4(1)=4;
 
-%Infected population
-k1 = (b/N)*Si(n)*Ii(n) - g*Ii(n);
-k2 = (b/N)*(Si(n)+((k1*h)/2))*(Ii(n)+((k1*h)/2))- g*(Ii(n)+((k1*h)/2));
-k3 = (b/N)*(Si(n)+((k2*h)/2))*(Ii(n)+((k2*h)/2)) - g*(Ii(n)+((k2*h)/2));
-k4 = (b/N)*(Si(n)+((k3*h)))*(Ii(n)+((k3*h))) - g*(Ii(n)+k3*h);
-Ii(n+2) = Ii(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+yb1(1)=4;
+yb2(1)=4;
+yb3(1)=4;
+yb4(1)=4;
 
-%Recovered Population
-k1 = g*Ii(n);
-k2 = g*(Ii(n)+((k1*h)/2));
-k3 = g*(Ii(n)+((k2*h)/2));
-k4 = g*(Ii(n)+k3*h);
-Ri(n+2) = Ri(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+y1(1)=4;
+y2(1)=4;
+y3(1)=4;
+y4(1)=4;
+
+te=[0,0,0,0];
+ti=[0,0,0,0];
+%N=4
+for i=1:length(x1)-1
+    ya1(i+1)=ya1(i)+(-ya1(i)/x1(i)+8*x1(i)^6)*((3-1)/N(1));
+    yb1(i+1)=(yb1(i)+8*x1(i+1)^6*((3-1)/N(1)))/(1+((3-1)/N(1))/x1(i+1));
+    y1(i+1)=3/x1(i)+x1(i)^7;
+    te(1)=te(1)+(ya1(i+1)-y1(i+1))^2;
+    ti(1)=ti(1)+(yb1(i+1)-y1(i+1))^2;
 end
-
-%Interpolation starting at second data point 
-for n = 2:length(t)-2 
-if (-1)^n >0    %if even stay the same
-Si(n+2)=Si(n+2);
-Ii(n+2)=Ii(n+2);
-Ri(n+2)=Ri(n+2);
-else            %else odd interpolate
-    Si(n+1)=Si(n-1)+((Si(n+2)-Si(n-1))/((n+2)-(n-1)))*((n+1)-(n-1));
-    Ii(n+1)=Ii(n-1)+((Ii(n+2)-Ii(n-1))/((n+2)-(n-1)))*((n+1)-(n-1));
-    Ri(n+1)=Ri(n-1)+((Ri(n+2)-Ri(n-1))/((n+2)-(n-1)))*((n+1)-(n-1));
-    TotS=(Si(n+1)-S(n+1));
-    TotI=(Ii(n+1)-I(n+1));
-    TotR=(Ri(n+1)-R(n+1));
+%N=8
+for i=1:length(x2)-1
+    ya2(i+1)=ya2(i)+(-ya2(i)/x2(i)+8*x2(i)^6)*((3-1)/N(2));
+    yb2(i+1)=(yb2(i)+8*x2(i+1)^6*((3-1)/N(2)))/(1+((3-1)/N(2))/x2(i+1));
+    y2(i+1)=3/x2(i)+x2(i)^7;
+    te(2)=te(2)+(ya2(i+1)-y2(i+1))^2;
+    ti(2)=ti(2)+(yb2(i+1)-y2(i+1))^2;
 end
+%N=16
+for i=1:length(x3)-1
+    ya3(i+1)=ya3(i)+(-ya3(i)/x3(i)+8*x3(i)^6)*((3-1)/N(3));
+    yb3(i+1)=(yb3(i)+8*x3(i+1)^6*((3-1)/N(3)))/(1+((3-1)/N(3))/x3(i+1));
+    y3(i+1)=3/x3(i)+x3(i)^7;
+    te(3)=te(3)+(ya3(i+1)-y3(i+1))^2;
+    ti(3)=ti(3)+(yb3(i+1)-y3(i+1))^2;
 end
-%Errors
-ES=sqrt(TotS^2/Ni);
-EI=sqrt(TotI^2/Ni);
-ER=sqrt(TotR^2/Ni);
+%N=32
+for i=1:length(x4)-1
+    ya4(i+1)=ya4(i)+(-ya4(i)/x4(i)+8*x4(i)^6)*((3-1)/N(4));
+    yb4(i+1)=(yb4(i)+8*x4(i+1)^6*((3-1)/N(4)))/(1+((3-1)/N(4))/x4(i+1));
+    y4(i+1)=3/x4(i)+x4(i)^7;
+    te(4)=te(4)+(ya4(i+1)-y4(i+1))^2;
+    ti(4)=ti(4)+(yb4(i+1)-y4(i+1))^2;
+end
+%Error
+for i=1:length(N)
+    Ee(i)=sqrt(te(i)/(N(i)+1));
+    Ei(i)=sqrt(ti(i)/(N(i)+1));
+end
 
 figure(2);
-plot(t,Si,t,Ii,t,Ri)
-title('Interpolation',h)
-xlabel('Time')
-ylabel('Population')
-legend({'S(t)','I(t)','R(t)'},'Location','northeast')
+subplot(1,2,1)
+plot(x1,ya1,x1,yb1,x1,y1)
+sgtitle('dy/dx=-y/x+8x^6')
+title('N=4')
+xlabel('x')
+ylabel('y')
+legend('Explicit','Implicit','True')
+subplot(1,2,2)
+plot(x4,ya4,x4,yb4,x4,y4)
+title('N=32')
+xlabel('x')
+ylabel('y')
+legend('Explicit','Implicit','True')
+
+figure(3)
+plot(N,Ee,N,Ei,log(N),log(Ee),log(N),log(Ei))
+title('Log(N) vs Log(Error)')
+xlabel('N')
+ylabel('E')
+legend('Explicit Error','Implicit Error','Log Explicit Error','Log Implicit Error')
