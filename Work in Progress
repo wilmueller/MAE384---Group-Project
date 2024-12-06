@@ -2,7 +2,7 @@
 clear,clc
 % Initial conditions
 N = 1000; %Population
-b = 0.3; %Rate of infection
+b = .3; %Rate of infection
 g = 0.1; %Recovery rate
 final = 100; %End time
 %Step size
@@ -12,39 +12,42 @@ I(1) = 10; %infected population
 S(1) = N-I(1); %susceptable population
 R(1) = 0; %Recovered Population
 n=1;
-for n = 1:h:final-1 %Time Duration
+for t=0:h:final %Time Duration
 
-%Susceptable population
-k1 = -(b/N)*S(n)*I(n);
-k2 = -(b/N)*(S(n)+((k1*h)/2))*(I(n)+((k1*h)/2));
-k3 = -(b/N)*(S(n)+((k2*h)/2))*(I(n)+((k2*h)/2));
-k4 = -(b/N)*(S(n)+((k3*h)))*(I(n)+((k3*h)));
-S(n+1) = S(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+% K1
+k1s = -(b/N)*S(n)*I(n);
+k1i = ((b/N)*S(n)*I(n)) - (g*I(n));
+k1r = g*I(n);
 
-%Infected population
-k1 = (b/N)*S(n)*I(n) - g*I(n);
-k2 = (b/N)*(S(n)+((k1*h)/2))*(I(n)+((k1*h)/2))- g*(I(n)+((k1*h)/2));
-k3 = (b/N)*(S(n)+((k2*h)/2))*(I(n)+((k2*h)/2)) - g*(I(n)+((k2*h)/2));
-k4 = (b/N)*(S(n)+((k3*h)))*(I(n)+((k3*h))) - g*(I(n)+k3*h);
-I(n+1) = I(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+%K2
+k2s = -(b/N)*(S(n)+(k1s*h*.5))*(I(n)+(k1i*h*.5));
+k2i = ((b/N)*(S(n)+(k1s*h*.5))*(I(n)+(k1i*h*.5)))- (g*(I(n)+(k1i*h*.5)));
+k2r = g*(I(n)+(k1i*h*.5));
 
-%Recovered Population
-k1 = g*I(n);
-k2 = g*(I(n)+((k1*h)/2));
-k3 = g*(I(n)+((k2*h)/2));
-k4 = g*(I(n)+k3*h);
-R(n+1) = R(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
-%n=n+1;
+%K3
+k3s = -(b/N)*(S(n)+(k2s*h*.5))*(I(n)+(k2i*h*.5));
+k3i = ((b/N)*(S(n)+(k2s*h*.5))*(I(n)+(k2i*h*.5))) - (g*(I(n)+(k2i*h*.5)));
+k3r = g*(I(n)+(k2i*h*.5));
+
+%K4
+k4s = -(b/N)*(S(n)+(k3s*h))*(I(n)+(k3i*h));
+k4i = ((b/N)*(S(n)+(k3s*h))*(I(n)+(k3i*h))) - (g*(I(n)+(k3i*h)));
+k4r = g*(I(n)+k3i*h);
+
+S(n+1) = S(n) + (h/6)*(k1s + 2*k2s + 2*k3s + k4s);
+I(n+1) = I(n) + (h/6)*(k1i + 2*k2i + 2*k3i + k4i);
+R(n+1) = R(n) + (h/6)*(k1r + 2*k2r + 2*k3r + k4r);
+
+n=n+1;
 end
 
-t=1:h:final;
-figure(1);
+t=0:h:final+h;
+figure
 plot(t,S,t,I,t,R)
-title('Runge-Kutta',h)
+title('Runge-Kutta (step size = 1)')
 xlabel('Time')
 ylabel('Population')
 legend({'S(t)','I(t)','R(t)'},'Location','northeast')
-
 %%
 %Interploation
 %initial conditions
@@ -70,52 +73,58 @@ Ri(1) = 0; %Recovered Population
 Iq(1) = 10; %infected population
 Sq(1) = N-Ii(1); %susceptable population
 Rq(1) = 0; %Recovered Population
-t=1:h:final;
+%t=1:h:final;
 
 %Linear Interpolation
 for n = 1:1:(final-1) %Time Duration
     if (-1)^n > 0   %if even RK4
-%Susceptable population
-k1 = -(b/N)*Si(n)*Ii(n);
-k2 = -(b/N)*(Si(n)+((k1*h)/2))*(Ii(n)+((k1*h)/2));
-k3 = -(b/N)*(Si(n)+((k2*h)/2))*(Ii(n)+((k2*h)/2));
-k4 = -(b/N)*(Si(n)+((k3*h)))*(Ii(n)+((k3*h)));
-Si(n+2) = Si(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+% K1
+k1s = -(b/N)*Si(n)*Ii(n);
+k1i = ((b/N)*Si(n)*Ii(n)) - (g*Ii(n));
+k1r = g*Ii(n);
 
-%Infected population
-k1 = (b/N)*Si(n)*Ii(n) - g*Ii(n);
-k2 = (b/N)*(Si(n)+((k1*h)/2))*(Ii(n)+((k1*h)/2))- g*(Ii(n)+((k1*h)/2));
-k3 = (b/N)*(Si(n)+((k2*h)/2))*(Ii(n)+((k2*h)/2)) - g*(Ii(n)+((k2*h)/2));
-k4 = (b/N)*(Si(n)+((k3*h)))*(Ii(n)+((k3*h))) - g*(Ii(n)+k3*h);
-Ii(n+2) = Ii(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+%K2
+k2s = -(b/N)*(Si(n)+(k1s*h*.5))*(Ii(n)+(k1i*h*.5));
+k2i = ((b/N)*(Si(n)+(k1s*h*.5))*(Ii(n)+(k1i*h*.5)))- (g*(Ii(n)+(k1i*h*.5)));
+k2r = g*(Ii(n)+(k1i*h*.5));
 
-%Recovered Population
-k1 = g*Ii(n);
-k2 = g*(Ii(n)+((k1*h)/2));
-k3 = g*(Ii(n)+((k2*h)/2));
-k4 = g*(Ii(n)+k3*h);
-Ri(n+2) = Ri(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+%K3
+k3s = -(b/N)*(Si(n)+(k2s*h*.5))*(Ii(n)+(k2i*h*.5));
+k3i = ((b/N)*(Si(n)+(k2s*h*.5))*(Ii(n)+(k2i*h*.5))) - (g*(Ii(n)+(k2i*h*.5)));
+k3r = g*(Ii(n)+(k2i*h*.5));
+
+%K4
+k4s = -(b/N)*(Si(n)+(k3s*h))*(Ii(n)+(k3i*h));
+k4i = ((b/N)*(Si(n)+(k3s*h))*(Ii(n)+(k3i*h))) - (g*(Ii(n)+(k3i*h)));
+k4r = g*(Ii(n)+k3i*h);
+
+Si(n+2) = Si(n) + (h/6)*(k1s + 2*k2s + 2*k3s + k4s);
+Ii(n+2) = Ii(n) + (h/6)*(k1i + 2*k2i + 2*k3i + k4i);
+Ri(n+2) = Ri(n) + (h/6)*(k1r + 2*k2r + 2*k3r + k4r);
     elseif n==1   %if equal to 1 use RK4 to find day 2
-%Susceptable population
-k1 = -(b/N)*Si(n)*Ii(n);
-k2 = -(b/N)*(Si(n)+((k1*h)/2))*(Ii(n)+((k1*h)/2));
-k3 = -(b/N)*(Si(n)+((k2*h)/2))*(Ii(n)+((k2*h)/2));
-k4 = -(b/N)*(Si(n)+((k3*h)))*(Ii(n)+((k3*h)));
-Si(n+1) = Si(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+% K1
+k1s = -(b/N)*Si(n)*Ii(n);
+k1i = ((b/N)*Si(n)*Ii(n)) - (g*Ii(n));
+k1r = g*Ii(n);
 
-%Infected population
-k1 = (b/N)*Si(n)*Ii(n) - g*Ii(n);
-k2 = (b/N)*(Si(n)+((k1*h)/2))*(Ii(n)+((k1*h)/2))- g*(Ii(n)+((k1*h)/2));
-k3 = (b/N)*(Si(n)+((k2*h)/2))*(Ii(n)+((k2*h)/2)) - g*(Ii(n)+((k2*h)/2));
-k4 = (b/N)*(Si(n)+((k3*h)))*(Ii(n)+((k3*h))) - g*(Ii(n)+k3*h);
-Ii(n+1) = Ii(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+%K2
+k2s = -(b/N)*(Si(n)+(k1s*h*.5))*(Ii(n)+(k1i*h*.5));
+k2i = ((b/N)*(Si(n)+(k1s*h*.5))*(Ii(n)+(k1i*h*.5)))- (g*(Ii(n)+(k1i*h*.5)));
+k2r = g*(Ii(n)+(k1i*h*.5));
 
-%Recovered Population
-k1 = g*Ii(n);
-k2 = g*(Ii(n)+((k1*h)/2));
-k3 = g*(Ii(n)+((k2*h)/2));
-k4 = g*(Ii(n)+k3*h);
-Ri(n+1) = Ri(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+%K3
+k3s = -(b/N)*(Si(n)+(k2s*h*.5))*(Ii(n)+(k2i*h*.5));
+k3i = ((b/N)*(Si(n)+(k2s*h*.5))*(Ii(n)+(k2i*h*.5))) - (g*(Ii(n)+(k2i*h*.5)));
+k3r = g*(Ii(n)+(k2i*h*.5));
+
+%K4
+k4s = -(b/N)*(Si(n)+(k3s*h))*(Ii(n)+(k3i*h));
+k4i = ((b/N)*(Si(n)+(k3s*h))*(Ii(n)+(k3i*h))) - (g*(Ii(n)+(k3i*h)));
+k4r = g*(Ii(n)+k3i*h);
+
+Si(n+1) = Si(n) + (h/6)*(k1s + 2*k2s + 2*k3s + k4s);
+Ii(n+1) = Ii(n) + (h/6)*(k1i + 2*k2i + 2*k3i + k4i);
+Ri(n+1) = Ri(n) + (h/6)*(k1r + 2*k2r + 2*k3r + k4r);
     elseif (-1)^n <0          %if odd and greater than 1 interpolate
     Si(n)=Si(n-1)+((Si(n+1)-Si(n-1))/((n+1)-(n-1)))*((n)-(n-1));
     Ii(n)=Ii(n-1)+((Ii(n+1)-Ii(n-1))/((n+2)-(n-1)))*((n)-(n-1));
@@ -129,47 +138,53 @@ end
 %Quadratic Interpolation
 for n = 1:1:(final-1) %Time Duration
     if (-1)^n > 0   %if even RK4
-%Susceptable population
-k1 = -(b/N)*Sq(n)*Ii(n);
-k2 = -(b/N)*(Sq(n)+((k1*h)/2))*(Iq(n)+((k1*h)/2));
-k3 = -(b/N)*(Sq(n)+((k2*h)/2))*(Iq(n)+((k2*h)/2));
-k4 = -(b/N)*(Sq(n)+((k3*h)))*(Iq(n)+((k3*h)));
-Sq(n+2) = Sq(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+% K1
+k1s = -(b/N)*Sq(n)*Iq(n);
+k1i = ((b/N)*Sq(n)*Iq(n)) - (g*Iq(n));
+k1r = g*Iq(n);
 
-%Infected population
-k1 = (b/N)*Sq(n)*Iq(n) - g*Iq(n);
-k2 = (b/N)*(Sq(n)+((k1*h)/2))*(Iq(n)+((k1*h)/2))- g*(Iq(n)+((k1*h)/2));
-k3 = (b/N)*(Sq(n)+((k2*h)/2))*(Iq(n)+((k2*h)/2)) - g*(Iq(n)+((k2*h)/2));
-k4 = (b/N)*(Sq(n)+((k3*h)))*(Iq(n)+((k3*h))) - g*(Iq(n)+k3*h);
-Iq(n+2) = Iq(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+%K2
+k2s = -(b/N)*(Sq(n)+(k1s*h*.5))*(Iq(n)+(k1i*h*.5));
+k2i = ((b/N)*(Sq(n)+(k1s*h*.5))*(Iq(n)+(k1i*h*.5)))- (g*(Iq(n)+(k1i*h*.5)));
+k2r = g*(Iq(n)+(k1i*h*.5));
 
-%Recovered Population
-k1 = g*Iq(n);
-k2 = g*(Iq(n)+((k1*h)/2));
-k3 = g*(Iq(n)+((k2*h)/2));
-k4 = g*(Iq(n)+k3*h);
-Rq(n+2) = Rq(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+%K3
+k3s = -(b/N)*(Sq(n)+(k2s*h*.5))*(Iq(n)+(k2i*h*.5));
+k3i = ((b/N)*(Sq(n)+(k2s*h*.5))*(Iq(n)+(k2i*h*.5))) - (g*(Iq(n)+(k2i*h*.5)));
+k3r = g*(Iq(n)+(k2i*h*.5));
+
+%K4
+k4s = -(b/N)*(Sq(n)+(k3s*h))*(Iq(n)+(k3i*h));
+k4i = ((b/N)*(Sq(n)+(k3s*h))*(Iq(n)+(k3i*h))) - (g*(Iq(n)+(k3i*h)));
+k4r = g*(Iq(n)+k3i*h);
+
+Sq(n+2) = Sq(n) + (h/6)*(k1s + 2*k2s + 2*k3s + k4s);
+Iq(n+2) = Iq(n) + (h/6)*(k1i + 2*k2i + 2*k3i + k4i);
+Rq(n+2) = Rq(n) + (h/6)*(k1r + 2*k2r + 2*k3r + k4r);
     elseif n==1   %if equal to 1 use RK4 to find day 2
-%Susceptable population
-k1 = -(b/N)*Sq(n)*Iq(n);
-k2 = -(b/N)*(Sq(n)+((k1*h)/2))*(Iq(n)+((k1*h)/2));
-k3 = -(b/N)*(Sq(n)+((k2*h)/2))*(Iq(n)+((k2*h)/2));
-k4 = -(b/N)*(Sq(n)+((k3*h)))*(Iq(n)+((k3*h)));
-Sq(n+1) = Sq(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+% K1
+k1s = -(b/N)*Sq(n)*Iq(n);
+k1i = ((b/N)*Sq(n)*Iq(n)) - (g*Iq(n));
+k1r = g*Iq(n);
 
-%Infected population
-k1 = (b/N)*Sq(n)*Iq(n) - g*Iq(n);
-k2 = (b/N)*(Sq(n)+((k1*h)/2))*(Iq(n)+((k1*h)/2))- g*(Iq(n)+((k1*h)/2));
-k3 = (b/N)*(Sq(n)+((k2*h)/2))*(Iq(n)+((k2*h)/2)) - g*(Iq(n)+((k2*h)/2));
-k4 = (b/N)*(Sq(n)+((k3*h)))*(Iq(n)+((k3*h))) - g*(Iq(n)+k3*h);
-Iq(n+1) = Iq(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+%K2
+k2s = -(b/N)*(Sq(n)+(k1s*h*.5))*(Iq(n)+(k1i*h*.5));
+k2i = ((b/N)*(Sq(n)+(k1s*h*.5))*(Iq(n)+(k1i*h*.5)))- (g*(Iq(n)+(k1i*h*.5)));
+k2r = g*(Iq(n)+(k1i*h*.5));
 
-%Recovered Population
-k1 = g*Iq(n);
-k2 = g*(Iq(n)+((k1*h)/2));
-k3 = g*(Iq(n)+((k2*h)/2));
-k4 = g*(Iq(n)+k3*h);
-Rq(n+1) = Ri(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+%K3
+k3s = -(b/N)*(Sq(n)+(k2s*h*.5))*(Iq(n)+(k2i*h*.5));
+k3i = ((b/N)*(Sq(n)+(k2s*h*.5))*(Iq(n)+(k2i*h*.5))) - (g*(Iq(n)+(k2i*h*.5)));
+k3r = g*(Iq(n)+(k2i*h*.5));
+
+%K4
+k4s = -(b/N)*(Sq(n)+(k3s*h))*(Iq(n)+(k3i*h));
+k4i = ((b/N)*(Sq(n)+(k3s*h))*(Iq(n)+(k3i*h))) - (g*(Iq(n)+(k3i*h)));
+k4r = g*(Iq(n)+k3i*h);
+
+Sq(n+1) = Sq(n) + (h/6)*(k1s + 2*k2s + 2*k3s + k4s);
+Iq(n+1) = Iq(n) + (h/6)*(k1i + 2*k2i + 2*k3i + k4i);
+Rq(n+1) = Rq(n) + (h/6)*(k1r + 2*k2r + 2*k3r + k4r);
     elseif (-1)^n <0          %if odd and greater than 1 interpolate
     Sq(n)=((n-(n-1))*(n-(n+1))/(((n-2)-(n-1))*((n-2)-(n+1))))*Sq(n-2)+((n-(n-2))*(n-(n+1)))/(((n-1)-(n-2))*((n-1)-(n+1)))*Sq(n-1)+((n-(n-2))*(n-(n-1)))/((((n+1)-(n-2))*((n+1)-(n-1))))*Sq(n+1);
     Iq(n)=((n-(n-1))*(n-(n+1))/(((n-2)-(n-1))*((n-2)-(n+1))))*Iq(n-2)+((n-(n-2))*(n-(n+1)))/(((n-1)-(n-2))*((n-1)-(n+1)))*Iq(n-1)+((n-(n-2))*(n-(n-1)))/((((n+1)-(n-2))*((n+1)-(n-1))))*Iq(n+1);
@@ -187,9 +202,9 @@ ER=sqrt(TotR/Ni);
 ESq=sqrt(TotSq/Ni);
 EIq=sqrt(TotIq/Ni);
 ERq=sqrt(TotRq/Ni);
-
+%{
+%Graphs(optional)
 t=1:1:100;
-
 figure(2);
 subplot(1,2,1)
 plot(t,Si,t,Ii,t,Ri)
@@ -204,10 +219,10 @@ title('Quadratic Interpolation')
 xlabel('Time')
 ylabel('Population')
 legend({'S(t)','I(t)','R(t)'},'Location','northeast')
-
+%}
 %Table Variables
 St = [ES;ESq];
 It = [EI;EIq];
 Rt = [ER;ERq];
 Error = table(St,It,Rt)
-%Linear interpolation was more accurate
+%Linear interpolation had smaller errors
