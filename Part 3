@@ -1,0 +1,102 @@
+% MATLAB code for Part 3
+
+clear;
+clc;
+
+% parameters and initial conditions
+N = 1000;      % population
+beta = 0.3;    % infection rate
+gamma = 0.1;   % recovery rate
+S0 = 990;      % suscepitble population
+I0 = 10;       % infected population
+R0 = 0;        % recovered population
+h = 1;         % time step (days)
+t_max = 30;    % max simulation time (days)
+
+% Step 1: run SIR model for 30 days true data
+S = S0;
+I = I0;
+R = R0;
+
+S_values = zeros(1, t_max+1);
+I_values = zeros(1, t_max+1);
+R_values = zeros(1, t_max+1);
+
+t = 0:h:t_max;
+S_values(1) = S;
+I_values(1) = I;
+R_values(1) = R;
+
+for n = 1:t_max
+    % Runge-Kutta 4th Order
+    % K1
+    k1S = -(beta/N) * S * I;
+    k1I = (beta/N) * S * I - gamma * I;
+    k1R = gamma * I;
+
+    % K2
+    k2S = -(beta/N) * (S + 0.5*h*k1S) * (I + 0.5*h*k1I);
+    k2I = (beta/N) * (S + 0.5*h*k1S) * (I + 0.5*h*k1I) - gamma * (I + 0.5*h*k1I);
+    k2R = gamma * (I + 0.5*h*k1I);
+
+    % K3
+    k3S = -(beta/N) * (S + 0.5*h*k2S) * (I + 0.5*h*k2I);
+    k3I = (beta/N) * (S + 0.5*h*k2S) * (I + 0.5*h*k2I) - gamma * (I + 0.5*h*k2I);
+    k3R = gamma * (I + 0.5*h*k2I);
+
+    % K4
+    k4S = -(beta/N) * (S + h*k3S) * (I + h*k3I);
+    k4I = (beta/N) * (S + h*k3S) * (I + h*k3I) - gamma * (I + h*k3I);
+    k4R = gamma * (I + h*k3I);
+
+    % Update S, I, R
+    S = S + (h/6) * (k1S + 2*k2S + 2*k3S + k4S);
+    I = I + (h/6) * (k1I + 2*k2I + 2*k3I + k4I);
+    R = R + (h/6) * (k1R + 2*k2R + 2*k3R + k4R);
+
+    S_values(n+1) = S;
+    I_values(n+1) = I;
+    R_values(n+1) = R;
+end
+
+% Step 2: apply linear least squares to 30 days
+ln_I = log(I_values(1:30));
+t_linear = t(1:30)'; % linear time vector
+
+A = [t_linear, ones(length(t_linear), 1)]; % matrix
+b = ln_I'; % response vector
+
+x = A \ b; % solve linear system for least squares
+k_est = x(1); % find k
+ln_I0_est = x(2); % estimated ln(I0)
+I0_est = exp(ln_I0_est); % estimated I(0)
+
+beta_est = k_est * N / S0 + gamma; % estimate beta using k_est
+
+% Step 3: again with 10 days
+ln_I_10 = log(I_values(1:10));
+t_linear_10 = t(1:10)';
+
+A_10 = [t_linear_10, ones(length(t_linear_10), 1)]; % design Matrix for 10 days
+b_10 = ln_I_10'; % response vector for 10 days
+
+x_10 = A_10 \ b_10; % solve linear system for least squares (10 days)
+k_est_10 = x_10(1); % find k 
+ln_I0_est_10 = x_10(2); % find ln(I0) for 10 days
+I0_est_10 = exp(ln_I0_est_10); % find I(0) for 10 days
+
+beta_est_10 = k_est_10 * N / S0 + gamma; % find beta 
+
+% display results
+fprintf('Estimates using 30 days of data:\n');
+fprintf('I(0): %.2f\n', I0_est);
+fprintf('Beta: %.2f\n', beta_est);
+
+fprintf('\nEstimates using 10 days of data:\n');
+fprintf('I(0): %.2f\n', I0_est_10);
+fprintf('Beta: %.2f\n', beta_est_10);
+
+fprintf(['The estimates of I(0) and beta improve when applying linear least \n' ...
+    'squares for only 10 days than using 30 days of data. This is because\n' ...
+    'in the first 10 days of data, the infection data is more linear minimizing\n' ...
+    'the amount of error rather than deviating later in 30 days of data.']);
