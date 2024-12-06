@@ -1,5 +1,187 @@
-%%Group Project Runge-Kutta
-clear
+%% Part 3: 4th order Runge-Kutta
+clear;
+clc;
+
+
+% Seasonal Influenza
+
+% Initial conditions
+
+N = 1000; %Population
+
+b = .3; %Rate of infection
+
+g = 0.1; %Recovery rate
+
+final = 100; %End time
+
+%Step size
+h = 1;
+
+
+I(1) = 10; %infected population
+
+S(1) = N-I(1); %susceptable population
+
+R(1) = 0; %Recovered Population
+
+n=1;
+for t=0:h:final %Time Duration
+    
+    
+    %K1
+    k1s = -(b/N)*S(n)*I(n);
+
+    k1i = ((b/N)*S(n)*I(n)) - (g*I(n));
+
+    k1r = g*I(n);
+
+
+    %K2
+    k2s = -(b/N)*(S(n)+(k1s*h*.5))*(I(n)+(k1i*h*.5));
+
+    k2i = ((b/N)*(S(n)+(k1s*h*.5))*(I(n)+(k1i*h*.5)))- (g*(I(n)+(k1i*h*.5)));
+     
+    k2r = g*(I(n)+(k1i*h*.5));
+
+
+
+    %K3
+    k3s = -(b/N)*(S(n)+(k2s*h*.5))*(I(n)+(k2i*h*.5));
+
+    k3i = ((b/N)*(S(n)+(k2s*h*.5))*(I(n)+(k2i*h*.5))) - (g*(I(n)+(k2i*h*.5)));
+
+    k3r = g*(I(n)+(k2i*h*.5));
+
+
+    %K4
+    k4s = -(b/N)*(S(n)+(k3s*h))*(I(n)+(k3i*h));
+
+    k4i = ((b/N)*(S(n)+(k3s*h))*(I(n)+(k3i*h))) - (g*(I(n)+(k3i*h)));
+
+    k4r = g*(I(n)+k3i*h);
+    
+
+
+
+    %Calculate S(t), I(t), R(t)
+    S(n+1) = S(n) + (h/6)*(k1s + 2*k2s + 2*k3s + k4s);
+
+
+    I(n+1) = I(n) + (h/6)*(k1i + 2*k2i + 2*k3i + k4i);
+
+
+    R(n+1) = R(n) + (h/6)*(k1r + 2*k2r + 2*k3r + k4r);
+
+    
+
+n=n+1;
+end
+
+
+t=0:h:final+h;
+
+figure
+plot(t,S,t,I,t,R)
+
+title('SIR Model: Seasonal Influenza (step size = 1)')
+xlabel('Time')
+ylabel('Population')
+legend({'S(t)','I(t)','R(t)'},'Location','northeast')
+
+
+
+% COVID-19
+
+% Initial conditions
+
+N = 1000; %Population
+
+b = 1; %Rate of infection
+
+g = 0.1; %Recovery rate
+
+final = 100; %End time
+
+%Step size
+h = 1;
+
+
+I(1) = 10; %infected population
+
+S(1) = N-I(1); %susceptable population
+
+R(1) = 0; %Recovered Population
+
+n=1;
+for t=0:h:final %Time Duration
+    
+    
+    % K1
+    k1s = -(b/N)*S(n)*I(n);
+
+    k1i = ((b/N)*S(n)*I(n)) - (g*I(n));
+
+    k1r = g*I(n);
+
+
+    %K2
+    k2s = -(b/N)*(S(n)+(k1s*h*.5))*(I(n)+(k1i*h*.5));
+
+    k2i = ((b/N)*(S(n)+(k1s*h*.5))*(I(n)+(k1i*h*.5)))- (g*(I(n)+(k1i*h*.5)));
+     
+    k2r = g*(I(n)+(k1i*h*.5));
+
+
+
+    %K3
+    k3s = -(b/N)*(S(n)+(k2s*h*.5))*(I(n)+(k2i*h*.5));
+
+    k3i = ((b/N)*(S(n)+(k2s*h*.5))*(I(n)+(k2i*h*.5))) - (g*(I(n)+(k2i*h*.5)));
+
+    k3r = g*(I(n)+(k2i*h*.5));
+
+
+    %K4
+    k4s = -(b/N)*(S(n)+(k3s*h))*(I(n)+(k3i*h));
+
+    k4i = ((b/N)*(S(n)+(k3s*h))*(I(n)+(k3i*h))) - (g*(I(n)+(k3i*h)));
+
+    k4r = g*(I(n)+k3i*h);
+    
+
+
+
+    %Calculate S(t), I(t), R(t)
+    S(n+1) = S(n) + (h/6)*(k1s + 2*k2s + 2*k3s + k4s);
+
+
+    I(n+1) = I(n) + (h/6)*(k1i + 2*k2i + 2*k3i + k4i);
+
+
+    R(n+1) = R(n) + (h/6)*(k1r + 2*k2r + 2*k3r + k4r);
+
+    
+
+n=n+1;
+end
+
+
+t=0:h:final+h;
+
+figure
+plot(t,S,t,I,t,R)
+
+title('SIR Model: COVID-19 (step size = 1)')
+xlabel('Time')
+ylabel('Population')
+legend({'S(t)','I(t)','R(t)'},'Location','northeast')
+
+
+
+
+
+% Measles
 
 % Initial conditions
 
@@ -80,8 +262,21 @@ t=0:h:final+h;
 figure
 plot(t,S,t,I,t,R)
 
-title('Runge-Kutta (step size = 1)')
+title('SIR Model: Measles (step size = 1)')
 xlabel('Time')
 ylabel('Population')
 legend({'S(t)','I(t)','R(t)'},'Location','northeast')
+
+
+fprintf(['The values of beta and gamma are the rates of infection and ' ...
+         'recovery respectively. Increasing the beta value causes the ' ...
+         'maximum infected population to increase and occur quicker. ' ...
+         'And increasing the gamma value causes the rate of infection to ' ...
+         'decrease. This is reflected in the graphs provided.'])
+
+
+
+
+
+
 
