@@ -12,7 +12,7 @@ g = 0.2; %Recovery rate
 final = 100; %End time
 
 %Step size
-h = 1;
+h = .1;
 
 
 I(1) = 10; %infected population
@@ -25,43 +25,49 @@ n=1;
 for t=0:h:final %Time Duration
     
     
-    %Susceptable population
-    k1 = -(b/N)*S(n)*I(n);
+    % K1
+    k1s = -(b/N)*S(n)*I(n);
 
-    k2 = -(b/N)*(S(n)+(k1*h*.5))*(I(n)+(k1*h*.5));
+    k1i = ((b/N)*S(n)*I(n)) - (g*I(n));
 
-    k3 = -(b/N)*(S(n)+(k2*h*.5))*(I(n)+(k2*h*.5));
+    k1r = g*I(n);
 
-    k4 = -(b/N)*(S(n)+(k3*h))*(I(n)+(k3*h));
+
+    %K2
+    k2s = -(b/N)*(S(n)+(k1s*h*.5))*(I(n)+(k1i*h*.5));
+
+    k2i = ((b/N)*(S(n)+(k1s*h*.5))*(I(n)+(k1i*h*.5)))- (g*(I(n)+(k1i*h*.5)));
+     
+    k2r = g*(I(n)+(k1i*h*.5));
+
+
+
+    %K3
+    k3s = -(b/N)*(S(n)+(k2s*h*.5))*(I(n)+(k2i*h*.5));
+
+    k3i = ((b/N)*(S(n)+(k2s*h*.5))*(I(n)+(k2i*h*.5))) - (g*(I(n)+(k2i*h*.5)));
+
+    k3r = g*(I(n)+(k2i*h*.5));
+
+
+    %K4
+    k4s = -(b/N)*(S(n)+(k3s*h))*(I(n)+(k3i*h));
+
+    k4i = ((b/N)*(S(n)+(k3s*h))*(I(n)+(k3i*h))) - (g*(I(n)+(k3i*h)));
+
+    k4r = g*(I(n)+k3i*h);
     
-    
-    S(n+1) = S(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
 
 
-    %Infected population
-    k1 = ((b/N)*S(n)*I(n)) - (g*I(n));
 
-    k2 = ((b/N)*(S(n)+(k1*h*.5))*(I(n)+(k1*h*.5)))- (g*(I(n)+(k1*h*.5)));
-
-    k3 = ((b/N)*(S(n)+(k2*h*.5))*(I(n)+(k2*h*.5))) - (g*(I(n)+(k2*h*.5)));
-
-    k4 = ((b/N)*(S(n)+(k3*h))*(I(n)+(k3*h))) - (g*(I(n)+(k3*h)));
+    %Calculate S(t), I(t), R(t)
+    S(n+1) = S(n) + (h/6)*(k1s + 2*k2s + 2*k3s + k4s);
 
 
-    I(n+1) = I(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+    I(n+1) = I(n) + (h/6)*(k1i + 2*k2i + 2*k3i + k4i);
 
 
-    %Recovered Population
-    k1 = g*I(n);
-
-    k2 = g*(I(n)+(k1*h*.5));
-
-    k3 = g*(I(n)+(k2*h*.5));
-
-    k4 = g*(I(n)+k3*h);
-
-
-    R(n+1) = R(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+    R(n+1) = R(n) + (h/6)*(k1r + 2*k2r + 2*k3r + k4r);
 
     
 
@@ -78,3 +84,4 @@ title('Runge-Kutta (step size = 1)')
 xlabel('Time')
 ylabel('Population')
 legend({'S(t)','I(t)','R(t)'},'Location','northeast')
+
