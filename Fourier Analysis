@@ -60,5 +60,76 @@ P1(2:final-1) = 2*P1(2:final-1);
 
 figure
 plot(f,P1)
+title('Peak frequency (Omega = 2 * Pi * 365/365)')
+xlabel('Frequency')
+ylabel('Spectrum')
+
+fprintf('A peak at 1 Hz frequency is expected because the model’s transmission rate oscillates with a period of 1 day, which corresponds to a frequency of 1 Hz.');
+
+clear
+% Initial conditions
+N = 1000; %Population
+bo = 0.3;
+A = 5;
+w = 2*pi*100/365;
+g = 0.1; %Recovery rate
+final = 100; %End time
+%Step size
+h = .1;
+
+I(1) = 10; %infected population
+S(1) = N-I(1); %susceptable population
+R(1) = 0; %Recovered Population
+
+n=1;
+for t=0:h:final %Time Duration
+
+%Susceptable population
+k1 = -((bo*(1+A*sin(w*t)))/N)*S(n)*I(n);
+k2 = -((bo*(1+A*sin(w*(t+h*.5))))/N)*(S(n)+(k1*h*.5))*(I(n)+(k1*h*.5));
+k3 = -((bo*(1+A*sin(w*(t+h*.5))))/N)*(S(n)+(k2*h*.5))*(I(n)+(k2*h*.5));
+k4 = -((bo*(1+A*sin(w*(t+h*.5))))/N)*(S(n)+(k3*h))*(I(n)+(k3*h));
+S(n+1) = S(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+
+%Infected population
+k1 = (((bo*(1+A*sin(w*(t+h*.5))))/N)*S(n)*I(n)) - (g*I(n));
+k2 = (((bo*(1+A*sin(w*(t+h*.5))))/N)*(S(n)+(k1*h*.5))*(I(n)+(k1*h*.5)))- (g*(I(n)+(k1*h*.5)));
+k3 = (((bo*(1+A*sin(w*(t+h*.5))))/N)*(S(n)+(k2*h*.5))*(I(n)+(k2*h*.5))) - (g*(I(n)+(k2*h*.5)));
+k4 = (((bo*(1+A*sin(w*(t+h*.5))))/N)*(S(n)+(k3*h))*(I(n)+(k3*h))) - (g*(I(n)+(k3*h)));
+I(n+1) = I(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+
+%Recovered Population
+k1 = g*I(n);
+k2 = g*(I(n)+(k1*h*.5));
+k3 = g*(I(n)+(k2*h*.5));
+k4 = g*(I(n)+k3*h);
+R(n+1) = R(n) + (h/6)*(k1 + 2*k2 + 2*k3 + k4);
+
+n=n+1;
+end
+
+t=0:h:final+h;
+figure
+plot(t,S,t,I,t,R)
+title('Runge-Kutta (step size = 1)')
+xlabel('Time')
+ylabel('Population')
+legend({'S(t)','I(t)','R(t)'},'Location','northeast')
 
 
+T = final;
+N=(final/h);
+f = (0:(N/2))/T;
+% Calculate spectrum
+spectrum=fft(I);
+P2 = abs(spectrum/N);
+P1 = P2(1:N/2+1);
+P1(2:final-1) = 2*P1(2:final-1);
+
+figure
+plot(f,P1)
+title('Peak frequency (Omega = 2 * Pi * 100/365)')
+xlabel('Frequency')
+ylabel('Spectrum')
+
+fprintf('The peak is at a lower frequency and more extreme. This makes sense because more people will enter the transmission period during the "off" periods and causes a higher peak when they are transmitting the disease. The peak is at the omega value of 100/365.');
